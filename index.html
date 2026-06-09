@@ -294,6 +294,112 @@
             color: #ffffff;
         }
 
+        /* Estilos para o gráfico de rosca */
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 15px;
+        }
+
+        .pie-chart-wrapper {
+            position: relative;
+            width: 200px;
+            height: 200px;
+            margin-bottom: 20px;
+        }
+
+        .pie-chart {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pie-chart svg {
+            width: 100%;
+            height: 100%;
+            transform: rotate(-90deg);
+        }
+
+        .pie-chart path {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .pie-chart path:hover {
+            filter: brightness(1.2);
+            stroke: #ffd700;
+            stroke-width: 3;
+            transition: all 0.3s ease;
+        }
+
+        .chart-center {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            pointer-events: none;
+        }
+
+        .chart-center-text {
+            font-size: 0.85rem;
+            color: #ffd700;
+            font-weight: 600;
+            background: rgba(0,0,0,0.8);
+            padding: 5px 10px;
+            border-radius: 20px;
+            white-space: nowrap;
+        }
+
+        .chart-legend {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.8rem;
+            color: #fff;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 5px;
+            border-radius: 8px;
+        }
+
+        .legend-item:hover {
+            background: rgba(218,165,32,0.2);
+            transform: translateX(5px);
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+        }
+
+        .legend-label {
+            flex: 1;
+        }
+
+        .legend-value {
+            color: #ffd700;
+            font-weight: 600;
+        }
+
+        .legend-percent {
+            color: #888;
+            font-size: 0.7rem;
+            margin-left: 5px;
+        }
+
         .international-card-text {
             color: #ffffff;
             line-height: 1.6;
@@ -369,7 +475,7 @@
             color: #ffffff;
         }
 
-        /* Modal para edição do cartão */
+        /* Modal para transações */
         .modal {
             display: none;
             position: fixed;
@@ -924,6 +1030,13 @@
             .nav-icon {
                 font-size: 1.1rem;
             }
+            .pie-chart-wrapper {
+                width: 160px;
+                height: 160px;
+            }
+            .chart-center-text {
+                font-size: 0.7rem;
+            }
         }
     </style>
 </head>
@@ -962,11 +1075,51 @@
     <div class="content-area" id="contentArea"></div>
 </div>
 
+<!-- Modal de Depósito/Saque Nacional -->
+<div id="transactionModalNational" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="nationalModalTitle">💰 Operação</h2>
+            <button class="close-modal" onclick="closeNationalTransactionModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Valor (R$)</label>
+                <input type="number" id="nationalTransactionAmount" placeholder="Digite o valor" step="0.01">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeNationalTransactionModal()">Cancelar</button>
+                <button class="btn" id="confirmNationalTransaction">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Depósito/Saque Internacional -->
+<div id="transactionModalInternational" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="internationalModalTitle">💰 Operação</h2>
+            <button class="close-modal" onclick="closeInternationalTransactionModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Valor (USD)</label>
+                <input type="number" id="internationalTransactionAmount" placeholder="Digite o valor" step="0.01">
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeInternationalTransactionModal()">Cancelar</button>
+                <button class="btn" id="confirmInternationalTransaction">Confirmar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Modal de Edição do Cartão Nacional -->
 <div id="editCardModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
-            <h2>💳 Gerenciar Cartão</h2>
+            <h2>💳 Gerenciar Cartão Nacional</h2>
             <button class="close-modal" onclick="closeCardModal()">&times;</button>
         </div>
         <div class="modal-body">
@@ -996,6 +1149,45 @@
             <div class="modal-buttons">
                 <button class="btn btn-cancel" onclick="closeCardModal()">Cancelar</button>
                 <button class="btn" id="saveCardChanges">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Edição do Cartão Internacional -->
+<div id="editInternationalCardModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>💳 Gerenciar Cartão Internacional</h2>
+            <button class="close-modal" onclick="closeInternationalCardModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Número do Cartão</label>
+                <input type="text" id="internationalCardNumber" placeholder="XXXX XXXX XXXX XXXX" maxlength="19">
+            </div>
+            <div class="form-group">
+                <label>Nome do Titular</label>
+                <input type="text" id="internationalCardHolder" placeholder="NOME COMO ESTÁ NO CARTÃO">
+            </div>
+            <div class="form-group">
+                <label>Data de Validade (MM/AA)</label>
+                <input type="text" id="internationalCardExpiry" placeholder="MM/AA" maxlength="5">
+            </div>
+            <div class="form-group">
+                <label>CVV</label>
+                <input type="password" id="internationalCardCvv" placeholder="***" maxlength="3">
+            </div>
+            <div class="form-group">
+                <label>Limite do Cartão (USD)</label>
+                <input type="number" id="internationalCardLimit" placeholder="Digite o limite" step="1000">
+            </div>
+            <div class="limit-info">
+                💰 Limite disponível: <span id="internationalAvailableLimit">$ 0,00</span>
+            </div>
+            <div class="modal-buttons">
+                <button class="btn btn-cancel" onclick="closeInternationalCardModal()">Cancelar</button>
+                <button class="btn" id="saveInternationalCardChanges">Salvar Alterações</button>
             </div>
         </div>
     </div>
@@ -1090,6 +1282,14 @@
             cvv: "***",
             holder: "LUCAS OLIVEIRA",
             limit: 10000.00
+        },
+        
+        internationalCard: {
+            number: "**** **** **** 5678",
+            expiry: "10/29",
+            cvv: "***",
+            holder: "LUCAS OLIVEIRA",
+            limit: 5000.00
         }
     };
 
@@ -1144,7 +1344,12 @@
         {date:"18/06/2026 16:20", op:"buy", ticker:"SOLR3", qty:40, price:22.10, total:884.00, cashAfter:1904.00},
     ];
 
+    // Variáveis para controlar qual operação está sendo feita
+    let currentNationalOperation = null; // 'deposit' ou 'withdraw'
+    let currentInternationalOperation = null; // 'deposit' ou 'withdraw'
+
     const fmt = v => "R$ " + v.toLocaleString("pt-BR",{minimumFractionDigits:2,maximumFractionDigits:2});
+    const fmtUSD = v => "$ " + v.toLocaleString("en-US",{minimumFractionDigits:2,maximumFractionDigits:2});
     const pct = v => (v>=0?"+":"") + v.toFixed(2) + "%";
 
     function updateTotalBalance() {
@@ -1164,6 +1369,105 @@
         }
     }
 
+    // Funções para modal de transação nacional
+    function openNationalDepositModal() {
+        currentNationalOperation = 'deposit';
+        const modal = document.getElementById('transactionModalNational');
+        document.getElementById('nationalModalTitle').innerHTML = '💰 Depósito - Conta Nacional';
+        document.getElementById('nationalTransactionAmount').value = '';
+        modal.classList.add('active');
+    }
+
+    function openNationalWithdrawModal() {
+        currentNationalOperation = 'withdraw';
+        const modal = document.getElementById('transactionModalNational');
+        document.getElementById('nationalModalTitle').innerHTML = '💰 Saque - Conta Nacional';
+        document.getElementById('nationalTransactionAmount').value = '';
+        modal.classList.add('active');
+    }
+
+    function closeNationalTransactionModal() {
+        const modal = document.getElementById('transactionModalNational');
+        modal.classList.remove('active');
+        currentNationalOperation = null;
+    }
+
+    function confirmNationalTransaction() {
+        const amount = parseFloat(document.getElementById('nationalTransactionAmount').value);
+        
+        if (!amount || amount <= 0) {
+            showToast("Valor inválido!", "error");
+            return;
+        }
+
+        if (currentNationalOperation === 'deposit') {
+            userData.nationalBalance += amount;
+            showToast(`Depósito de ${amount.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })} realizado!`);
+        } else if (currentNationalOperation === 'withdraw') {
+            if (userData.nationalBalance >= amount) {
+                userData.nationalBalance -= amount;
+                showToast(`Saque de ${amount.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })} realizado!`);
+            } else {
+                showToast("Saldo insuficiente!", "error");
+                return;
+            }
+        }
+        
+        updateTotalBalance();
+        refreshCurrentTab();
+        closeNationalTransactionModal();
+    }
+
+    // Funções para modal de transação internacional
+    function openInternationalDepositModal() {
+        currentInternationalOperation = 'deposit';
+        const modal = document.getElementById('transactionModalInternational');
+        document.getElementById('internationalModalTitle').innerHTML = '💰 Depósito - Conta Internacional';
+        document.getElementById('internationalTransactionAmount').value = '';
+        modal.classList.add('active');
+    }
+
+    function openInternationalWithdrawModal() {
+        currentInternationalOperation = 'withdraw';
+        const modal = document.getElementById('transactionModalInternational');
+        document.getElementById('internationalModalTitle').innerHTML = '💰 Saque - Conta Internacional';
+        document.getElementById('internationalTransactionAmount').value = '';
+        modal.classList.add('active');
+    }
+
+    function closeInternationalTransactionModal() {
+        const modal = document.getElementById('transactionModalInternational');
+        modal.classList.remove('active');
+        currentInternationalOperation = null;
+    }
+
+    function confirmInternationalTransaction() {
+        const amount = parseFloat(document.getElementById('internationalTransactionAmount').value);
+        
+        if (!amount || amount <= 0) {
+            showToast("Valor inválido!", "error");
+            return;
+        }
+
+        if (currentInternationalOperation === 'deposit') {
+            userData.internationalBalance += amount;
+            showToast(`Depósito de $${amount.toFixed(2)} USD realizado!`);
+        } else if (currentInternationalOperation === 'withdraw') {
+            if (userData.internationalBalance >= amount) {
+                userData.internationalBalance -= amount;
+                showToast(`Saque de $${amount.toFixed(2)} USD realizado!`);
+            } else {
+                showToast("Saldo insuficiente em dólar!", "error");
+                return;
+            }
+        }
+        
+        updateTotalBalance();
+        refreshCurrentTab();
+        closeInternationalTransactionModal();
+    }
+
+    // Funções para cartão nacional
     function openCardModal() {
         const modal = document.getElementById('editCardModal');
         document.getElementById('cardNumber').value = userData.nationalCard.number;
@@ -1196,7 +1500,43 @@
         
         closeCardModal();
         refreshCurrentTab();
-        showToast("Cartão atualizado com sucesso!");
+        showToast("Cartão nacional atualizado com sucesso!");
+    }
+
+    // Funções para cartão internacional
+    function openInternationalCardModal() {
+        const modal = document.getElementById('editInternationalCardModal');
+        document.getElementById('internationalCardNumber').value = userData.internationalCard.number;
+        document.getElementById('internationalCardHolder').value = userData.internationalCard.holder;
+        document.getElementById('internationalCardExpiry').value = userData.internationalCard.expiry;
+        document.getElementById('internationalCardCvv').value = userData.internationalCard.cvv;
+        document.getElementById('internationalCardLimit').value = userData.internationalCard.limit;
+        const available = userData.internationalCard.limit * 0.7;
+        document.getElementById('internationalAvailableLimit').innerText = available.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+        modal.classList.add('active');
+    }
+
+    function closeInternationalCardModal() {
+        const modal = document.getElementById('editInternationalCardModal');
+        modal.classList.remove('active');
+    }
+
+    function saveInternationalCardChanges() {
+        const newNumber = document.getElementById('internationalCardNumber').value;
+        const newHolder = document.getElementById('internationalCardHolder').value;
+        const newExpiry = document.getElementById('internationalCardExpiry').value;
+        const newCvv = document.getElementById('internationalCardCvv').value;
+        const newLimit = parseFloat(document.getElementById('internationalCardLimit').value);
+        
+        if (newNumber) userData.internationalCard.number = newNumber;
+        if (newHolder) userData.internationalCard.holder = newHolder.toUpperCase();
+        if (newExpiry) userData.internationalCard.expiry = newExpiry;
+        if (newCvv) userData.internationalCard.cvv = newCvv;
+        if (newLimit && newLimit > 0) userData.internationalCard.limit = newLimit;
+        
+        closeInternationalCardModal();
+        refreshCurrentTab();
+        showToast("Cartão internacional atualizado com sucesso!");
     }
 
     function openProfileModal() {
@@ -1314,7 +1654,7 @@
                     <td class="pv ${cls}">${fmt(res)} <small>(${pct(resPct)})</small></td>
                     <td>
                         <button class="btn" style="padding:6px 12px; font-size:12px; background:linear-gradient(135deg,#d4af37,#f1c75b); color:#000; margin:0 5px;" onclick='openTrade("${c.ticker}","buy")'>+</button>
-                        <button class="btn btn-secondary" style="padding:6px 12px; font-size:12px; margin:0 5px;" onclick='openTrade("${c.ticker}","sell")'>−</button>
+                        <button class="btn btn-secondary" style="padding:6px 12px; font-size:12px; margin:0 5px;" onclick='openTrade("${c.ticker}","sell")'>-</button>
                     </td>
                 </tr>`;
         });
@@ -1575,12 +1915,128 @@
         `;
     }
 
+    function renderDonutChart() {
+        // Dados do gráfico de gastos mensais
+        const gastos = [
+            { nome: "Alimentação", valor: 1850.00, cor: "#ff6b6b" },
+            { nome: "Moradia", valor: 3200.00, cor: "#4ecdc4" },
+            { nome: "Transporte", valor: 450.00, cor: "#ffe66d" },
+            { nome: "Lazer", valor: 680.00, cor: "#a8e6cf" },
+            { nome: "Outros", valor: 420.00, cor: "#ffd93d" }
+        ];
+        
+        const totalGastos = gastos.reduce((sum, item) => sum + item.valor, 0);
+        
+        // Calcular ângulos e porcentagens
+        let currentAngle = 0;
+        const segments = [];
+        
+        gastos.forEach((item, index) => {
+            const angle = (item.valor / totalGastos) * 360;
+            const percentage = (item.valor / totalGastos) * 100;
+            segments.push({
+                ...item,
+                startAngle: currentAngle,
+                endAngle: currentAngle + angle,
+                percentage: percentage,
+                index: index
+            });
+            currentAngle += angle;
+        });
+        
+        // Criar SVG para o gráfico de rosca
+        const size = 200;
+        const center = size / 2;
+        const radius = 80;
+        const holeRadius = 40;
+        
+        let svgHtml = `<svg viewBox="0 0 ${size} ${size}" style="width: 100%; height: 100%;">`;
+        
+        segments.forEach(segment => {
+            // Calcular coordenadas para o arco
+            const startRad = (segment.startAngle * Math.PI) / 180;
+            const endRad = (segment.endAngle * Math.PI) / 180;
+            
+            // Calcular pontos para o caminho do arco externo
+            const x1 = center + radius * Math.cos(startRad);
+            const y1 = center + radius * Math.sin(startRad);
+            const x2 = center + radius * Math.cos(endRad);
+            const y2 = center + radius * Math.sin(endRad);
+            
+            // Calcular pontos para o arco interno (buraco)
+            const x3 = center + holeRadius * Math.cos(endRad);
+            const y3 = center + holeRadius * Math.sin(endRad);
+            const x4 = center + holeRadius * Math.cos(startRad);
+            const y4 = center + holeRadius * Math.sin(startRad);
+            
+            const largeArcFlag = segment.endAngle - segment.startAngle > 180 ? 1 : 0;
+            
+            const pathData = `
+                M ${x1} ${y1}
+                A ${radius} ${radius} 0 ${largeArcFlag} 1 ${x2} ${y2}
+                L ${x3} ${y3}
+                A ${holeRadius} ${holeRadius} 0 ${largeArcFlag} 0 ${x4} ${y4}
+                Z
+            `;
+            
+            const percentageText = `${segment.percentage.toFixed(1)}%`;
+            
+            svgHtml += `
+                <path d="${pathData}" 
+                      fill="${segment.cor}" 
+                      stroke="#0a0a0a" 
+                      stroke-width="2"
+                      data-category="${segment.nome}"
+                      data-value="${segment.valor}"
+                      data-percentage="${segment.percentage.toFixed(1)}"
+                      onmouseover="highlightSegment(this, '${segment.nome}', '${segment.valor.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}', '${percentageText}')"
+                      onmouseout="resetHighlight(this)"
+                      style="cursor: pointer; transition: all 0.3s ease;">
+                </path>
+            `;
+        });
+        
+        svgHtml += `</svg>`;
+        
+        // Gerar legendas com hover
+        let legendHtml = `<div class="chart-legend">`;
+        segments.forEach(segment => {
+            const percentageText = `${segment.percentage.toFixed(1)}%`;
+            legendHtml += `
+                <div class="legend-item" 
+                     onmouseover="highlightLegendItem('${segment.nome}', '${segment.valor.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}', '${percentageText}')"
+                     onmouseout="resetLegendHighlight()">
+                    <div class="legend-color" style="background: ${segment.cor};"></div>
+                    <span class="legend-label">${segment.nome}</span>
+                    <span class="legend-value">${segment.valor.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</span>
+                    <span class="legend-percent">(${percentageText})</span>
+                </div>
+            `;
+        });
+        
+        legendHtml += `
+            <div class="legend-item" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #333;">
+                <div class="legend-color" style="background: transparent;"></div>
+                <span class="legend-label" style="font-weight: 600;">Total</span>
+                <span class="legend-value" style="color: #ffd700; font-size: 1rem;">${totalGastos.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</span>
+            </div>
+        `;
+        legendHtml += `</div>`;
+        
+        return {
+            svg: svgHtml,
+            legend: legendHtml,
+            total: totalGastos
+        };
+    }
+
     function renderNational() {
+        const chart = renderDonutChart();
+        
         return `
             <div class="card">
                 <div class="card-title"><span>🇧🇷</span> Conta Nacional (BRL)</div>
                 <div class="card-amount">${userData.nationalBalance.toLocaleString('pt-br', { style: 'currency', currency: 'BRL' })}</div>
-                <div class="input-group"><label>Valor (R$)</label><input type="number" id="nationalAmount" class="amount-input" placeholder="Digite o valor" step="0.01"></div>
                 <button class="btn" id="simulateDepositNational">+ Depositar</button>
                 <button class="btn btn-secondary" id="simulateWithdrawNational">- Sacar</button>
             </div>
@@ -1596,8 +2052,18 @@
                 <button class="btn-secondary btn" id="openEditCardBtn" style="margin-top:15px;">⚙️ Gerenciar Cartão</button>
             </div>
             <div class="card">
-                <div class="card-title">📊 Últimas movimentações</div>
-                <ul class="transactions-list"><li>• Pix recebido - R$ 1.200,00</li><li>• Pagamento conta luz - R$ 185,40</li><li>• Transferência enviada - R$ 500,00</li></ul>
+                <div class="card-title">📊 Gastos Mensais</div>
+                <div class="chart-container">
+                    <div class="pie-chart-wrapper">
+                        <div class="pie-chart" id="donutChart">
+                            ${chart.svg}
+                        </div>
+                        <div class="chart-center" id="chartCenter">
+                            <div class="chart-center-text">Gastos<br>Mensais</div>
+                        </div>
+                    </div>
+                    ${chart.legend}
+                </div>
             </div>
         `;
     }
@@ -1608,13 +2074,19 @@
                 <div class="card-title"><span>🌎</span> Conta Internacional (USD)</div>
                 <div class="card-amount">$ ${userData.internationalBalance.toFixed(2)} USD</div>
                 <p style="font-size:0.8rem; color:#888;">Cotação: R$ 5,20 / USD</p>
-                <div class="input-group"><label>Valor (USD)</label><input type="number" id="internationalAmount" class="amount-input" placeholder="Digite o valor" step="0.01"></div>
-                <button class="btn" id="simulateDepositInternational">+ Adicionar</button>
+                <button class="btn" id="simulateDepositInternational">+ Depositar</button>
                 <button class="btn btn-secondary" id="simulateWithdrawInternational">- Sacar</button>
             </div>
             <div class="card">
-                <div class="card-title">💳 Cartão Internacional</div>
-                <div class="international-card-text"><p>✅ Cartão Virtual Global ativo</p><p>🌍 Aceito em mais de 200 países</p><p>💱 Sem taxas de spread</p></div>
+                <div class="card-title"><span>💳</span> Cartão Internacional</div>
+                <div class="credit-card">
+                    <div class="card-brand">GLOBAL BANK</div>
+                    <div class="card-number">${userData.internationalCard.number}</div>
+                    <div class="card-details"><span>Válido até ${userData.internationalCard.expiry}</span><span>CVV ${userData.internationalCard.cvv}</span></div>
+                    <div class="card-holder">${userData.internationalCard.holder}</div>
+                    <div class="card-limit">💰 Limite total: $${userData.internationalCard.limit.toFixed(2)} USD<br>📊 Limite disponível: $${(userData.internationalCard.limit * 0.7).toFixed(2)} USD</div>
+                </div>
+                <button class="btn-secondary btn" id="openEditInternationalCardBtn" style="margin-top:15px;">⚙️ Gerenciar Cartão</button>
             </div>
         `;
     }
@@ -1659,31 +2131,119 @@
         `;
     }
 
+    // Funções globais para hover do gráfico
+    window.highlightSegment = function(element, category, value, percentage) {
+        // Resetar todos os paths primeiro
+        const allPaths = document.querySelectorAll('#donutChart path');
+        allPaths.forEach(path => {
+            path.style.filter = 'brightness(1)';
+            path.style.strokeWidth = '2';
+        });
+        
+        // Destacar o segmento atual
+        element.style.filter = 'brightness(1.2)';
+        element.style.strokeWidth = '4';
+        
+        // Atualizar o centro do gráfico com as informações
+        const centerDiv = document.getElementById('chartCenter');
+        if (centerDiv) {
+            centerDiv.innerHTML = `
+                <div class="chart-center-text" style="background: rgba(0,0,0,0.9);">
+                    ${category}<br>
+                    <span style="font-size: 0.7rem;">${value}</span><br>
+                    <span style="font-size: 0.65rem; color: #ffd700;">${percentage}</span>
+                </div>
+            `;
+        }
+        
+        // Destacar item correspondente na legenda
+        const legendItems = document.querySelectorAll('.legend-item');
+        legendItems.forEach(item => {
+            const label = item.querySelector('.legend-label');
+            if (label && label.textContent === category) {
+                item.style.background = 'rgba(218,165,32,0.2)';
+                item.style.transform = 'translateX(5px)';
+            } else if (label && label.textContent !== 'Total') {
+                item.style.background = 'transparent';
+                item.style.transform = 'translateX(0)';
+            }
+        });
+    };
+    
+    window.resetHighlight = function(element) {
+        // Resetar o segmento
+        element.style.filter = 'brightness(1)';
+        element.style.strokeWidth = '2';
+        
+        // Resetar o centro do gráfico
+        const centerDiv = document.getElementById('chartCenter');
+        if (centerDiv) {
+            centerDiv.innerHTML = `<div class="chart-center-text">Gastos<br>Mensais</div>`;
+        }
+        
+        // Resetar todos os itens da legenda
+        const legendItems = document.querySelectorAll('.legend-item');
+        legendItems.forEach(item => {
+            const label = item.querySelector('.legend-label');
+            if (label && label.textContent !== 'Total') {
+                item.style.background = 'transparent';
+                item.style.transform = 'translateX(0)';
+            }
+        });
+    };
+    
+    window.highlightLegendItem = function(category, value, percentage) {
+        // Encontrar e destacar o segmento correspondente no gráfico
+        const allPaths = document.querySelectorAll('#donutChart path');
+        allPaths.forEach(path => {
+            const pathCategory = path.getAttribute('data-category');
+            if (pathCategory === category) {
+                path.style.filter = 'brightness(1.2)';
+                path.style.strokeWidth = '4';
+            } else {
+                path.style.filter = 'brightness(1)';
+                path.style.strokeWidth = '2';
+            }
+        });
+        
+        // Atualizar o centro do gráfico
+        const centerDiv = document.getElementById('chartCenter');
+        if (centerDiv) {
+            centerDiv.innerHTML = `
+                <div class="chart-center-text" style="background: rgba(0,0,0,0.9);">
+                    ${category}<br>
+                    <span style="font-size: 0.7rem;">${value}</span><br>
+                    <span style="font-size: 0.65rem; color: #ffd700;">${percentage}</span>
+                </div>
+            `;
+        }
+    };
+    
+    window.resetLegendHighlight = function() {
+        // Resetar todos os paths
+        const allPaths = document.querySelectorAll('#donutChart path');
+        allPaths.forEach(path => {
+            path.style.filter = 'brightness(1)';
+            path.style.strokeWidth = '2';
+        });
+        
+        // Resetar o centro
+        const centerDiv = document.getElementById('chartCenter');
+        if (centerDiv) {
+            centerDiv.innerHTML = `<div class="chart-center-text">Gastos<br>Mensais</div>`;
+        }
+    };
+
     function setupEventDelegation() {
         const contentArea = document.getElementById('contentArea');
         contentArea.addEventListener('click', (event) => {
             if (event.target.id === 'openEditCardBtn') openCardModal();
+            if (event.target.id === 'openEditInternationalCardBtn') openInternationalCardModal();
             if (event.target.id === 'openEditProfileBtn') openProfileModal();
-            if (event.target.id === 'simulateDepositNational') {
-                const amount = parseFloat(document.getElementById('nationalAmount')?.value);
-                if (amount && amount > 0) { userData.nationalBalance += amount; updateTotalBalance(); refreshCurrentTab(); showToast(`Depósito de R$ ${amount.toFixed(2)} realizado!`); }
-                else showToast("Valor inválido!", "error");
-            }
-            if (event.target.id === 'simulateWithdrawNational') {
-                const amount = parseFloat(document.getElementById('nationalAmount')?.value);
-                if (amount && amount > 0 && userData.nationalBalance >= amount) { userData.nationalBalance -= amount; updateTotalBalance(); refreshCurrentTab(); showToast(`Saque de R$ ${amount.toFixed(2)} realizado!`); }
-                else showToast(amount > 0 ? "Saldo insuficiente!" : "Valor inválido!", "error");
-            }
-            if (event.target.id === 'simulateDepositInternational') {
-                const amount = parseFloat(document.getElementById('internationalAmount')?.value);
-                if (amount && amount > 0) { userData.internationalBalance += amount; updateTotalBalance(); refreshCurrentTab(); showToast(`Adicionado $${amount.toFixed(2)} USD!`); }
-                else showToast("Valor inválido!", "error");
-            }
-            if (event.target.id === 'simulateWithdrawInternational') {
-                const amount = parseFloat(document.getElementById('internationalAmount')?.value);
-                if (amount && amount > 0 && userData.internationalBalance >= amount) { userData.internationalBalance -= amount; updateTotalBalance(); refreshCurrentTab(); showToast(`Saque de $${amount.toFixed(2)} USD realizado!`); }
-                else showToast(amount > 0 ? "Saldo insuficiente em dólar!" : "Valor inválido!", "error");
-            }
+            if (event.target.id === 'simulateDepositNational') openNationalDepositModal();
+            if (event.target.id === 'simulateWithdrawNational') openNationalWithdrawModal();
+            if (event.target.id === 'simulateDepositInternational') openInternationalDepositModal();
+            if (event.target.id === 'simulateWithdrawInternational') openInternationalWithdrawModal();
         });
     }
 
@@ -1741,9 +2301,15 @@
         });
         setupEventDelegation();
         document.getElementById('saveCardChanges')?.addEventListener('click', saveCardChanges);
+        document.getElementById('saveInternationalCardChanges')?.addEventListener('click', saveInternationalCardChanges);
         document.getElementById('confirmEditProfile')?.addEventListener('click', saveProfileChanges);
+        document.getElementById('confirmNationalTransaction')?.addEventListener('click', confirmNationalTransaction);
+        document.getElementById('confirmInternationalTransaction')?.addEventListener('click', confirmInternationalTransaction);
         document.getElementById('editCardModal')?.addEventListener('click', (e) => { if (e.target === e.currentTarget) closeCardModal(); });
+        document.getElementById('editInternationalCardModal')?.addEventListener('click', (e) => { if (e.target === e.currentTarget) closeInternationalCardModal(); });
         document.getElementById('editProfileModal')?.addEventListener('click', (e) => { if (e.target === e.currentTarget) closeProfileModal(); });
+        document.getElementById('transactionModalNational')?.addEventListener('click', (e) => { if (e.target === e.currentTarget) closeNationalTransactionModal(); });
+        document.getElementById('transactionModalInternational')?.addEventListener('click', (e) => { if (e.target === e.currentTarget) closeInternationalTransactionModal(); });
         document.getElementById('tradeQty')?.addEventListener('input', updateTradeTotal);
     }
     
@@ -1751,4 +2317,3 @@
 </script>
 </body>
 </html>
-
